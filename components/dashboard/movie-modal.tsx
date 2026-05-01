@@ -35,7 +35,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
         {/* Backdrop */}
         <div className="relative h-56 md:h-72">
           <Image
-            src={movie.backdropPath}
+            src={movie.posterUrl}
             alt={movie.title}
             fill
             className="object-cover"
@@ -57,7 +57,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
             {/* Poster */}
             <div className="relative w-32 md:w-40 aspect-[2/3] rounded-xl overflow-hidden shadow-xl shrink-0 mx-auto md:mx-0">
               <Image
-                src={movie.posterPath}
+                src={movie.posterUrl}
                 alt={movie.title}
                 fill
                 className="object-cover"
@@ -85,46 +85,14 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
                   <Calendar className="w-4 h-4" />
                   <span>{new Date(movie.releaseDate).getFullYear()}</span>
                 </div>
-                {movie.runtime && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span>{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}min</span>
-                  </div>
-                )}
-                {movie.director && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span>{movie.director}</span>
-                  </div>
-                )}
               </div>
 
               {/* Genres */}
-              <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-
               {/* Overview */}
               <p className="text-muted-foreground leading-relaxed">
                 {movie.overview}
               </p>
 
-              {/* Cast */}
-              {movie.cast && movie.cast.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-semibold mb-2">Reparto principal</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {movie.cast.join(", ")}
-                  </p>
-                </div>
-              )}
 
               {/* Actions */}
               <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">

@@ -175,8 +175,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
         </div>
       )}
 
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         className="w-full h-11 text-base font-medium"
         disabled={isLoading}
       >

@@ -7,6 +7,7 @@ Tu proyecto está configurado para conectarse a una API NestJS en el puerto 3000
 ### Variables de Entorno
 
 El archivo `.env.local` ya está configurado:
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
@@ -16,14 +17,18 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 Tu API NestJS debe proporcionar los siguientes endpoints:
 
 #### Autenticación
+
 - **POST** `/auth/login` - Iniciar sesión
+
   ```json
   {
     "email": "usuario@email.com",
     "password": "contraseña"
   }
   ```
+
   Respuesta:
+
   ```json
   {
     "access_token": "jwt_token",
@@ -45,7 +50,9 @@ Tu API NestJS debe proporcionar los siguientes endpoints:
   ```
 
 #### Películas
+
 - **GET** `/movies` - Obtener todas las películas
+
   ```json
   [
     {
@@ -69,6 +76,7 @@ Tu API NestJS debe proporcionar los siguientes endpoints:
 - **GET** `/movies/search?q=query` - Buscar películas
 
 #### Recomendaciones con IA
+
 - **POST** `/recommendations` - Obtener recomendaciones basadas en IA
   ```json
   {

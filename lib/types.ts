@@ -1,15 +1,20 @@
 export interface Movie {
-  id: number
+  tmdbMovieId: number
   title: string
   overview: string
-  posterPath: string
-  backdropPath: string
+  rating: string
   releaseDate: string
-  rating: number
-  genres: string[]
-  runtime?: number
-  director?: string
-  cast?: string[]
+  posterUrl: string
+}
+
+export interface RecommendedMovie {
+  tmdbMovieId: number
+  title: string
+  overview: string
+  rating: string
+  releaseDate: string
+  posterUrl: string
+  reason: string
 }
 
 export interface User {
@@ -20,10 +25,20 @@ export interface User {
 }
 
 export interface AIRecommendationRequest {
-  prompt: string
+  preferences: string
 }
 
+
 export interface AIRecommendationResponse {
-  movies: Movie[]
-  explanation: string
+  interpretedPreferences: {
+    genres: string[]
+    keywords: string[]
+    similarTitles: string[]
+    isNew: boolean
+    tone: string
+    explanation: string
+  }
+  total: number
+  recommendations: RecommendedMovie[]
+  originalPreferences: string
 }

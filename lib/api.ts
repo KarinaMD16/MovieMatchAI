@@ -14,7 +14,18 @@ interface RegisterRequest {
 }
 
 interface AuthResponse {
-  access_token: string
+  message: string
+  user: {
+    id: string
+    email: string
+    name: string
+    password: string
+    createdAt: string
+  }
+}
+interface LoginResponse {
+  message: string,
+  accessToken: string
   user: {
     id: string
     email: string
@@ -73,12 +84,12 @@ class APIClient {
     return response.json()
   }
 
-  async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>("/auth/login", {
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const response = await this.request<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify(data),
     })
-    this.setToken(response.access_token)
+    this.setToken(response.accessToken)
     return response
   }
 
@@ -87,16 +98,15 @@ class APIClient {
       method: "POST",
       body: JSON.stringify(data),
     })
-    this.setToken(response.access_token)
     return response
   }
 
   async getMovies(): Promise<Movie[]> {
-    return this.request<Movie[]>("/movies")
+    return this.request<Movie[]>("/tmdb/popular")
   }
 
   async getMovieDetails(id: number): Promise<Movie> {
-    return this.request<Movie>(`/movies/${id}`)
+    return this.request<Movie>(`/tmdb/movie/${id}`)
   }
 
   async getRecommendations(
@@ -109,7 +119,7 @@ class APIClient {
   }
 
   async searchMovies(query: string): Promise<Movie[]> {
-    return this.request<Movie[]>(`/movies/search?q=${encodeURIComponent(query)}`)
+    return this.request<Movie[]>(`/tmdb/search?query=${encodeURIComponent(query)}`)
   }
 
   logout() {

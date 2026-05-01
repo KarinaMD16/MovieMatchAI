@@ -42,7 +42,7 @@ export function DashboardHeader() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">

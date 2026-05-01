@@ -4,8 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
-import { Sparkles, Send, Wand2 } from "lucide-react"
+import { Sparkles, Send, Wand2, Star } from "lucide-react"
 import { apiClient } from "@/lib/api"
+import type { AIRecommendationResponse, RecommendedMovie } from "@/lib/types"
 
 const examplePrompts = [
   "Peliculas de ciencia ficcion con giros inesperados",
@@ -17,7 +18,7 @@ const examplePrompts = [
 export function AIRecommendation() {
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [recommendations, setRecommendations] = useState<string | null>(null)
+  const [response, setResponse] = useState<AIRecommendationResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
@@ -27,11 +28,10 @@ export function AIRecommendation() {
     setError(null)
 
     try {
-      const response = await apiClient.getRecommendations({
-        prompt: prompt.trim(),
+      const result = await apiClient.getRecommendations({
+        preferences: prompt.trim(),
       })
-
-      setRecommendations(response.explanation)
+      setResponse(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al obtener recomendaciones")
     } finally {
@@ -47,7 +47,7 @@ export function AIRecommendation() {
     <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-background border border-primary/20">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-      
+
       <div className="relative p-6 md:p-8 space-y-6">
         <div className="flex items-start gap-4">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 shrink-0">
@@ -125,15 +125,59 @@ export function AIRecommendation() {
           </div>
         )}
 
-        {recommendations && (
-          <div className="p-4 rounded-xl bg-background/80 border border-border">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 shrink-0">
-                <Sparkles className="w-4 h-4 text-primary" />
+        {response && (
+          <div className="space-y-4">
+            {/* AI Analysis */}
+            <div className="p-4 rounded-xl bg-background/80 border border-border">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Análisis de la IA</p>
+                  <p className="text-sm text-muted-foreground">{response.interpretedPreferences.explanation}</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Respuesta de la IA</p>
-                <p className="text-muted-foreground">{recommendations}</p>
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Géneros</p>
+                    <p className="font-medium">{response.interpretedPreferences.genres.join(", ")}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Palabras clave</p>
+                    <p className="font-medium">{response.interpretedPreferences.keywords.join(", ")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommended Movies */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Recomendaciones ({response.total})</h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {response.recommendations.map((movie: RecommendedMovie) => (
+                  <div key={movie.tmdbMovieId} className="group cursor-pointer">
+                    <div className="relative overflow-hidden rounded-lg mb-2">
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full aspect-[2/3] object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-xs text-white text-center px-2">{movie.reason}</p>
+                      </div>
+                    </div>
+                    <h4 className="text-xs font-medium truncate">{movie.title}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                      <span className="text-xs text-muted-foreground">{movie.rating}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

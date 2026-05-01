@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [movies, setMovies] = useState<Movie[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchResults, setSearchResults] = useState<Movie[] | null>(null)
 
   useEffect(() => {
     const loadMovies = async () => {
@@ -36,11 +37,16 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
-      
+
       <main className="container mx-auto px-4 py-8 space-y-10">
         {/* Search Section */}
         <section className="space-y-4">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onResults={setSearchResults}
+            isLoading={isLoading}
+          />
         </section>
 
         {/* AI Recommendation Section */}
@@ -63,7 +69,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <MovieCatalog
-            movies={movies}
+            movies={searchQuery.trim() ? (searchResults || []) : movies}
             searchQuery={searchQuery}
             onMovieSelect={setSelectedMovie}
           />
@@ -71,9 +77,9 @@ export default function DashboardPage() {
       </main>
 
       {/* Movie Detail Modal */}
-      <MovieModal 
-        movie={selectedMovie} 
-        onClose={() => setSelectedMovie(null)} 
+      <MovieModal
+        movie={selectedMovie}
+        onClose={() => setSelectedMovie(null)}
       />
     </div>
   )

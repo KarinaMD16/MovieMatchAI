@@ -16,9 +16,7 @@ export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalo
 
     const query = searchQuery.toLowerCase()
     return movies.filter(movie =>
-      movie.title.toLowerCase().includes(query) ||
-      movie.genres.some(genre => genre.toLowerCase().includes(query)) ||
-      movie.director?.toLowerCase().includes(query)
+      movie.title.toLowerCase().includes(query) 
     )
   }, [searchQuery, movies])
 
@@ -50,9 +48,9 @@ export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalo
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {filteredMovies.map((movie) => (
-            <MovieCard 
-              key={movie.id} 
-              movie={movie} 
+            <MovieCard
+              key={movie.tmdbMovieId}
+              movie={movie}
               onClick={() => onMovieSelect(movie)}
             />
           ))}
