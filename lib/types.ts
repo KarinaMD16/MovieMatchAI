@@ -1,4 +1,5 @@
 export interface Movie {
+  favoriteId?: string
   tmdbMovieId: number
   title: string
   overview: string
@@ -9,6 +10,7 @@ export interface Movie {
   director?: string
   cast?: string[]
   runtime?: number
+  isFavorite?: boolean
 }
 
 export interface RecommendedMovie {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { DashboardHeader } from "@/components/dashboard/header"
 import { SearchBar } from "@/components/dashboard/search-bar"
 import { MovieCatalog } from "@/components/dashboard/movie-catalog"
@@ -17,22 +17,23 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchResults, setSearchResults] = useState<Movie[] | null>(null)
 
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        const data = await apiClient.getMovies()
-        setMovies(data)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar películas")
-        setMovies([])
-      } finally {
-        setIsLoading(false)
-      }
+  const loadMovies = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const data = await apiClient.getMovies()
+      setMovies(data)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar películas")
+      setMovies([])
+    } finally {
+      setIsLoading(false)
     }
-
-    loadMovies()
   }, [])
+
+  useEffect(() => {
+    void loadMovies()
+  }, [loadMovies])
 
   const handleMovieSelect = (movie: Movie | any) => {
     // Convertir RecommendedMovie a Movie si es necesario
@@ -86,15 +87,15 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div>
-            
-          <h2 className="text-2xl font-bold tracking-tight">
-            {searchQuery ? "Resultados de busqueda" : "Peliculas populares"}
-          </h2>
-          <MovieCatalog
-            movies={searchQuery.trim() ? (searchResults || []) : movies}
-            searchQuery={searchQuery}
-            onMovieSelect={handleMovieSelect}
-          />
+
+            <h2 className="text-2xl font-bold tracking-tight">
+              {searchQuery ? "Resultados de busqueda" : "Peliculas populares"}
+            </h2>
+            <MovieCatalog
+              movies={searchQuery.trim() ? (searchResults || []) : movies}
+              searchQuery={searchQuery}
+              onMovieSelect={handleMovieSelect}
+            />
           </div>
         )}
       </main>
@@ -103,6 +104,9 @@ export default function DashboardPage() {
       <MovieModal
         movie={selectedMovie}
         onClose={() => setSelectedMovie(null)}
+        onFavoritesChange={() => {
+          void loadMovies()
+        }}
       />
     </div>
   )
