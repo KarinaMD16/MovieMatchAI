@@ -162,11 +162,20 @@ class APIClient {
   }
 
   async getMovies(): Promise<Movie[]> {
-    return this.request<Movie[]>("/tmdb/popular")
+    const userId = this.getUserId()
+    if (!userId) {
+      throw new Error("User ID is required")
+    }
+    return this.request<Movie[]>(`/tmdb/popular?userId=${userId}`)
   }
 
   async getMovieDetails(id: number): Promise<Movie> {
-    return this.request<Movie>(`/tmdb/movie/${id}`)
+    const userId = this.getUserId()
+    if (!userId) {
+      throw new Error("User ID is required")
+    }
+
+    return this.request<Movie>(`/tmdb/movie/${id}/${userId}`)
   }
 
   async getRecommendations(
@@ -209,6 +218,19 @@ class APIClient {
     return this.request<{ message?: string }>(endpoint, {
       method: "POST",
       body: body,
+    })
+  }
+
+  async deleteFavorite(userId: string, favoriteId: string): Promise<{ message?: string }> {
+    if (!userId) {
+      throw new Error("User ID is required")
+    }
+    if (!favoriteId) {
+      throw new Error("Favorite ID is required")
+    }
+
+    return this.request<{ message?: string }>(`/favorites/${userId}/${favoriteId}`, {
+      method: "DELETE",
     })
   }
 

@@ -18,11 +18,14 @@ import { toast } from "sonner"
 interface MovieModalProps {
   movie: Movie | null
   onClose: () => void
+  onFavoritesChange?: () => void
 }
 
-export function MovieModal({ movie, onClose }: MovieModalProps) {
+export function MovieModal({ movie, onClose, onFavoritesChange }: MovieModalProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [isAddingFavorite, setIsAddingFavorite] = useState(false)
+  const [detailedMovie, setDetailedMovie] = useState<Movie | null>(movie)
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -32,8 +35,46 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
     return () => window.removeEventListener("keydown", handleEscape)
   }, [onClose])
 
+  useEffect(() => {
+    setIsFavorited(!!detailedMovie?.isFavorite)
+  }, [detailedMovie])
+
+  // Fetch movie details when modal opens or when movie prop changes
+  useEffect(() => {
+    let cancelled = false
+
+    const loadDetails = async () => {
+      if (!movie) {
+        setDetailedMovie(null)
+        return
+      }
+
+      // If the passed movie already has enough data and matches, use it first
+      setIsLoadingDetails(true)
+      try {
+        const data = await apiClient.getMovieDetails(Number(movie.tmdbMovieId))
+        if (!cancelled) {
+          setDetailedMovie(data)
+        }
+      } catch (err) {
+        // fallback to the provided movie if details fail
+        if (!cancelled) setDetailedMovie(movie)
+        console.error("Error loading movie details:", err)
+      } finally {
+        if (!cancelled) setIsLoadingDetails(false)
+      }
+    }
+
+    void loadDetails()
+
+    return () => {
+      cancelled = true
+    }
+  }, [movie])
+
   const handleAddToFavorites = async () => {
-    if (!movie) return
+    const currentMovie = detailedMovie ?? movie
+    if (!currentMovie) return
 
     const userId = apiClient.getUserId()
     if (!userId) {
@@ -43,7 +84,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
 
     setIsAddingFavorite(true)
     try {
-      const movieId = movie.tmdbMovieId
+      const movieId = currentMovie.tmdbMovieId
 
       if (!movieId) {
         throw new Error("No se pudo obtener el ID de la película")
@@ -55,6 +96,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
       if (response) {
         setIsFavorited(true)
         toast("¡Película agregada a favoritos!")
+        if (onFavoritesChange) onFavoritesChange()
       }
     } catch (error) {
       setIsFavorited(false)
@@ -70,12 +112,12 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
   return (
     <Dialog open={!!movie} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[95vw] lg:w-[90vw] max-w-7xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col border-none">  <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
-        >
-          <X className="w-5 h-5" />
-          <span className="sr-only">Cerrar</span>
-        </button>
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+      >
+        <X className="w-5 h-5" />
+        <span className="sr-only">Cerrar</span>
+      </button>
 
         <div className="flex flex-col lg:flex-row overflow-hidden">
           {/* Backdrop y Poster - Mobile/Tablet */}

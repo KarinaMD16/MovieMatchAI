@@ -1,22 +1,23 @@
 "use client"
 
 import { useMemo } from "react"
-import { MovieCard } from "./movie-card"
 import type { Movie } from "@/lib/types"
+import { MovieCard } from "./movie-card"
 
 interface MovieCatalogProps {
   movies: Movie[]
   searchQuery: string
   onMovieSelect: (movie: Movie) => void
+  isDeleteMode?: boolean
 }
 
-export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalogProps) {
+export function MovieCatalog({ movies, searchQuery, onMovieSelect, isDeleteMode = false }: MovieCatalogProps) {
   const filteredMovies = useMemo(() => {
     if (!searchQuery.trim()) return movies
 
     const query = searchQuery.toLowerCase()
     return movies.filter(movie =>
-      movie.title.toLowerCase().includes(query) 
+      movie.title.toLowerCase().includes(query)
     )
   }, [searchQuery, movies])
 
@@ -49,6 +50,7 @@ export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalo
               key={movie.tmdbMovieId}
               movie={movie}
               onClick={() => onMovieSelect(movie)}
+              isDeleteMode={isDeleteMode}
             />
           ))}
         </div>
