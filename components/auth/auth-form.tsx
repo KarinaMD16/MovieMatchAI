@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
 interface AuthFormProps {
   mode: "login" | "register"
@@ -21,6 +22,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     password: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState<string>("")
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -47,17 +49,31 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     setIsLoading(true)
+    setApiError("")
 
-    // TODO: Replace with actual API call
-    // Simulating API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    setIsLoading(false)
-    onSuccess()
+    try {
+      if (mode === "login") {
+        await apiClient.login({
+          email: formData.email,
+          password: formData.password,
+        })
+      } else {
+        await apiClient.register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        })
+      }
+      onSuccess()
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "Error en la autenticación")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +86,11 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {apiError && (
+        <div className="p-3 bg-destructive/10 border border-destructive text-destructive rounded-md text-sm">
+          {apiError}
+        </div>
+      )}
       {mode === "register" && (
         <div className="space-y-2">
           <Label htmlFor="name">Nombre completo</Label>
@@ -154,8 +175,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
         </div>
       )}
 
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         className="w-full h-11 text-base font-medium"
         disabled={isLoading}
       >

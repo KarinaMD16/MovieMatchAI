@@ -16,9 +16,9 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       className="group relative flex flex-col text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl overflow-hidden"
     >
       {/* Poster */}
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-muted">
+      <div className="relative aspect-2/3 rounded-xl overflow-hidden bg-muted">
         <Image
-          src={movie.posterPath}
+          src={movie.posterUrl}
           alt={movie.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -48,7 +48,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
           {movie.title}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {new Date(movie.releaseDate).getFullYear()} • {movie.genres[0]}
+          {new Date(movie.releaseDate).getFullYear()} 
         </p>
       </div>
     </button>

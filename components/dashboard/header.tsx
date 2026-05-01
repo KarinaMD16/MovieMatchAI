@@ -1,23 +1,38 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Film, User, Settings, LogOut, Heart } from "lucide-react"
+import { Film, User, Settings, LogOut, Heart, Search } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
 export function DashboardHeader() {
   const router = useRouter()
+  const [userName, setUserName] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userInitial, setUserInitial] = useState<string>("U")
+
+  useEffect(() => {
+    const name = apiClient.getUserName()
+    const email = apiClient.getUserEmail()
+    setUserName(name)
+    setUserEmail(email)
+    if (name) {
+      setUserInitial(name.charAt(0).toUpperCase())
+    }
+  }, [])
 
   const handleLogout = () => {
-    // TODO: Implement actual logout logic
+    apiClient.logout()
     router.push("/")
   }
 
@@ -32,10 +47,19 @@ export function DashboardHeader() {
         </div>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Button variant="ghost" className="text-foreground/80 hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="text-foreground/80 hover:text-foreground"
+            onClick={() => router.push("/dashboard")}
+          >
+            <Search className="w-4 h-4 mr-2" />
             Explorar
           </Button>
-          <Button variant="ghost" className="text-foreground/80 hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="text-foreground/80 hover:text-foreground"
+            onClick={() => router.push("/favorites")}
+          >
             <Heart className="w-4 h-4 mr-2" />
             Favoritos
           </Button>
@@ -43,14 +67,14 @@ export function DashboardHeader() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="/avatar-placeholder.jpg" alt="Usuario" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    U
+                    {userInitial}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -58,9 +82,9 @@ export function DashboardHeader() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">Usuario</p>
+                  <p className="font-medium">{userName || "Usuario"}</p>
                   <p className="text-sm text-muted-foreground">
-                    usuario@email.com
+                    {userEmail || "usuario@email.com"}
                   </p>
                 </div>
               </div>
@@ -69,7 +93,7 @@ export function DashboardHeader() {
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/favorites")}>
                 <Heart className="mr-2 h-4 w-4" />
                 <span>Mis favoritos</span>
               </DropdownMenuItem>

@@ -3,33 +3,28 @@
 import { useMemo } from "react"
 import { MovieCard } from "./movie-card"
 import type { Movie } from "@/lib/types"
-import { mockMovies } from "@/lib/mock-data"
 
 interface MovieCatalogProps {
+  movies: Movie[]
   searchQuery: string
   onMovieSelect: (movie: Movie) => void
 }
 
-export function MovieCatalog({ searchQuery, onMovieSelect }: MovieCatalogProps) {
+export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalogProps) {
   const filteredMovies = useMemo(() => {
-    if (!searchQuery.trim()) return mockMovies
+    if (!searchQuery.trim()) return movies
 
     const query = searchQuery.toLowerCase()
-    return mockMovies.filter(movie => 
-      movie.title.toLowerCase().includes(query) ||
-      movie.genres.some(genre => genre.toLowerCase().includes(query)) ||
-      movie.director?.toLowerCase().includes(query)
+    return movies.filter(movie =>
+      movie.title.toLowerCase().includes(query) 
     )
-  }, [searchQuery])
+  }, [searchQuery, movies])
 
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {searchQuery ? "Resultados de busqueda" : "Peliculas populares"}
-          </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground">
             {filteredMovies.length} {filteredMovies.length === 1 ? "pelicula encontrada" : "peliculas encontradas"}
           </p>
         </div>
@@ -50,9 +45,9 @@ export function MovieCatalog({ searchQuery, onMovieSelect }: MovieCatalogProps) 
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {filteredMovies.map((movie) => (
-            <MovieCard 
-              key={movie.id} 
-              movie={movie} 
+            <MovieCard
+              key={movie.tmdbMovieId}
+              movie={movie}
               onClick={() => onMovieSelect(movie)}
             />
           ))}
