@@ -69,8 +69,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
 
   return (
     <Dialog open={!!movie} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[95vw] max-w-6xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col">
-        <button
+      <DialogContent className="w-[95vw] lg:w-[90vw] max-w-7xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col border-none">  <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
         >
