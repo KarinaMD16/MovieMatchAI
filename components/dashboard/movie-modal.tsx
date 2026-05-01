@@ -3,12 +3,12 @@
 import { useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { 
-  Dialog, 
-  DialogContent, 
+import {
+  Dialog,
+  DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription 
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Star, Clock, Calendar, User, Play, Heart, X } from "lucide-react"
 import type { Movie } from "@/lib/types"
@@ -31,31 +31,31 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
 
   return (
     <Dialog open={!!movie} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-card">
-        {/* Backdrop */}
-        <div className="relative h-56 md:h-72">
-          <Image
-            src={movie.posterUrl}
-            alt={movie.title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
-          
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
-          >
-            <X className="w-5 h-5" />
-            <span className="sr-only">Cerrar</span>
-          </button>
-        </div>
+      <DialogContent className="max-w-xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col w-[95vw]">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+        >
+          <X className="w-5 h-5" />
+          <span className="sr-only">Cerrar</span>
+        </button>
 
-        <div className="relative px-6 pb-6 -mt-20 md:-mt-24">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Poster */}
-            <div className="relative w-32 md:w-40 aspect-[2/3] rounded-xl overflow-hidden shadow-xl shrink-0 mx-auto md:mx-0">
+        <div className="flex flex-col lg:flex-row overflow-hidden">
+          {/* Backdrop y Poster - Mobile/Tablet */}
+          <div className="lg:hidden relative h-56 md:h-72 w-full">
+            <Image
+              src={movie.posterUrl}
+              alt={movie.title}
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
+          </div>
+
+          {/* Poster - Desktop */}
+          <div className="hidden lg:flex flex-col items-center pt-6 px-6 shrink-0">
+            <div className="relative w-48 aspect-2/3 rounded-xl overflow-hidden shadow-xl">
               <Image
                 src={movie.posterUrl}
                 alt={movie.title}
@@ -63,44 +63,43 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
                 className="object-cover"
               />
             </div>
+          </div>
 
-            {/* Info */}
-            <div className="flex-1 space-y-4 text-center md:text-left">
-              <DialogHeader className="space-y-2">
-                <DialogTitle className="text-2xl md:text-3xl font-bold tracking-tight text-balance">
+          {/* Contenido - Scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-6 py-6 space-y-4">
+              <div className="space-y-2">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-balance">
                   {movie.title}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  Detalles de la pelicula {movie.title}
-                </DialogDescription>
-              </DialogHeader>
-              
-              {/* Meta info */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{movie.rating.toFixed(1)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(movie.releaseDate).getFullYear()}</span>
+                </h2>
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-medium">{movie.rating.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(movie.releaseDate).getFullYear()}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Genres */}
               {/* Overview */}
-              <p className="text-muted-foreground leading-relaxed">
-                {movie.overview}
-              </p>
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm">Sinopsis</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+                  {movie.overview}
+                </p>
+              </div>
 
 
               {/* Actions */}
-              <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
-                <Button className="gap-2">
+              <div className="flex flex-wrap gap-3 pt-6">
+                <Button className="gap-2 flex-1 md:flex-none">
                   <Play className="w-4 h-4" />
                   Ver trailer
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 flex-1 md:flex-none">
                   <Heart className="w-4 h-4" />
                   Agregar a favoritos
                 </Button>

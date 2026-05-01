@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
-import { Sparkles, Send, Wand2, Star } from "lucide-react"
+import { Sparkles, Send, Wand2, Star, ChevronDown, ChevronUp } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import type { AIRecommendationResponse, RecommendedMovie } from "@/lib/types"
 
@@ -20,6 +20,7 @@ export function AIRecommendation() {
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<AIRecommendationResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isMinimized, setIsMinimized] = useState(false)
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return
@@ -154,31 +155,54 @@ export function AIRecommendation() {
 
             {/* Recommended Movies */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Recomendaciones ({response.total})</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold">Recomendaciones ({response.total})</h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMinimized(!isMinimized)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  {isMinimized ? (
+                    <>
+                      <ChevronDown className="w-4 h-4 mr-1" />
+                      Expandir
+                    </>
+                  ) : (
+                    <>
+                      <ChevronUp className="w-4 h-4 mr-1" />
+                      Minimizar
+                    </>
+                  )}
+                </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {response.recommendations.map((movie: RecommendedMovie) => (
-                  <div key={movie.tmdbMovieId} className="group cursor-pointer">
-                    <div className="relative overflow-hidden rounded-lg mb-2">
-                      <img
-                        src={movie.posterUrl}
-                        alt={movie.title}
-                        className="w-full aspect-[2/3] object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <p className="text-xs text-white text-center px-2">{movie.reason}</p>
+
+              {!isMinimized && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {response.recommendations.map((movie: RecommendedMovie) => (
+                    <div key={movie.tmdbMovieId} className="group cursor-pointer">
+                      <div className="relative overflow-hidden rounded-lg mb-2">
+                        <img
+                          src={movie.posterUrl}
+                          alt={movie.title}
+                          className="w-full aspect-[2/3] object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <p className="text-xs text-white text-center px-2">{movie.reason}</p>
+                        </div>
+                      </div>
+                      <h4 className="text-xs font-medium truncate">{movie.title}</h4>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                        <span className="text-xs text-muted-foreground">{movie.rating}</span>
                       </div>
                     </div>
-                    <h4 className="text-xs font-medium truncate">{movie.title}</h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-                      <span className="text-xs text-muted-foreground">{movie.rating}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
