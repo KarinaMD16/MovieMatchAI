@@ -3,24 +3,24 @@
 import { useMemo } from "react"
 import { MovieCard } from "./movie-card"
 import type { Movie } from "@/lib/types"
-import { mockMovies } from "@/lib/mock-data"
 
 interface MovieCatalogProps {
+  movies: Movie[]
   searchQuery: string
   onMovieSelect: (movie: Movie) => void
 }
 
-export function MovieCatalog({ searchQuery, onMovieSelect }: MovieCatalogProps) {
+export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalogProps) {
   const filteredMovies = useMemo(() => {
-    if (!searchQuery.trim()) return mockMovies
+    if (!searchQuery.trim()) return movies
 
     const query = searchQuery.toLowerCase()
-    return mockMovies.filter(movie => 
+    return movies.filter(movie =>
       movie.title.toLowerCase().includes(query) ||
       movie.genres.some(genre => genre.toLowerCase().includes(query)) ||
       movie.director?.toLowerCase().includes(query)
     )
-  }, [searchQuery])
+  }, [searchQuery, movies])
 
   return (
     <section className="space-y-6">

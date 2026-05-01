@@ -1,23 +1,22 @@
-"use client"
-
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Film, User, Settings, LogOut, Heart } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
 export function DashboardHeader() {
   const router = useRouter()
 
   const handleLogout = () => {
-    // TODO: Implement actual logout logic
+    apiClient.logout()
     router.push("/")
   }
 

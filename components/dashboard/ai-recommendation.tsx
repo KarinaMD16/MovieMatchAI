@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
 import { Sparkles, Send, Wand2 } from "lucide-react"
+import { apiClient } from "@/lib/api"
 
 const examplePrompts = [
   "Peliculas de ciencia ficcion con giros inesperados",
@@ -17,18 +18,25 @@ export function AIRecommendation() {
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [recommendations, setRecommendations] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return
 
     setIsLoading(true)
-    
-    // TODO: Replace with actual AI API call
-    // Simulating API response
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    setRecommendations(`Basado en tu descripcion "${prompt}", te recomiendo explorar las peliculas en nuestro catalogo que coinciden con tus preferencias. Pronto conectaremos con una API de IA para darte recomendaciones personalizadas mas precisas.`)
-    setIsLoading(false)
+    setError(null)
+
+    try {
+      const response = await apiClient.getRecommendations({
+        prompt: prompt.trim(),
+      })
+
+      setRecommendations(response.explanation)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al obtener recomendaciones")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleExampleClick = (example: string) => {
@@ -103,6 +111,20 @@ export function AIRecommendation() {
         </div>
 
         {/* AI Response */}
+        {error && (
+          <div className="p-4 rounded-xl bg-destructive/10 border border-destructive">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-destructive/20 shrink-0">
+                <span className="text-lg">⚠️</span>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-destructive">Error</p>
+                <p className="text-sm text-destructive/80">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {recommendations && (
           <div className="p-4 rounded-xl bg-background/80 border border-border">
             <div className="flex items-start gap-3">
