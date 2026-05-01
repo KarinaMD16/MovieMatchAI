@@ -80,14 +80,60 @@ Tu API NestJS debe proporcionar los siguientes endpoints:
 - **POST** `/recommendations` - Obtener recomendaciones basadas en IA
   ```json
   {
-    "prompt": "Descripción de lo que el usuario busca"
+    "preferences": "Descripción de lo que el usuario busca"
   }
   ```
   Respuesta:
   ```json
   {
-    "movies": [Movie[], ...],
-    "explanation": "Explicación de las recomendaciones"
+    "interpretedPreferences": {
+      "genres": ["acción", "ciencia ficción"],
+      "keywords": ["espacio"],
+      "similarTitles": ["Interestelar"],
+      "isNew": false,
+      "tone": "épico",
+      "explanation": "Explicación del análisis"
+    },
+    "total": 8,
+    "recommendations": [
+      {
+        "tmdbMovieId": 324857,
+        "title": "Spider-Man: un nuevo universo",
+        "overview": "Descripción",
+        "rating": "8.5",
+        "releaseDate": "2018-12-14",
+        "posterUrl": "url_imagen",
+        "reason": "Por qué se recomienda"
+      }
+    ],
+    "originalPreferences": "Lo que escribió el usuario"
+  }
+  ```
+
+- **GET** `/recommendations/suggestions` - Obtener sugerencias de búsqueda
+  Respuesta:
+  ```json
+  {
+    "total": 8,
+    "suggestions": [
+      "Dramas intensos sobre acoso...",
+      "Películas de supervivencia..."
+    ]
+  }
+  ```
+
+#### Favoritos
+
+- **POST** `/favorites/{userId}` - Agregar película a favoritos
+  ```json
+  {
+    "movieId": 123
+  }
+  ```
+  Respuesta:
+  ```json
+  {
+    "message": "Película agregada a favoritos"
   }
   ```
 
@@ -99,13 +145,17 @@ El cliente API está en `lib/api.ts` y proporciona métodos para:
 - `apiClient.register(data)` - Registro
 - `apiClient.getMovies()` - Obtener películas
 - `apiClient.getMovieDetails(id)` - Detalles de película
-- `apiClient.getRecommendations(prompt)` - Recomendaciones IA
+- `apiClient.getRecommendations(preferences)` - Recomendaciones IA
+- `apiClient.getSuggestions()` - Sugerencias de búsqueda
 - `apiClient.searchMovies(query)` - Buscar películas
+- `apiClient.addToFavorites(userId, movieId)` - Agregar a favoritos
 - `apiClient.logout()` - Logout
 
-### Manejo de Tokens
+### Manejo de Tokens y Usuario
 
 El token JWT se almacena automáticamente en `localStorage` bajo la clave `authToken` y se envía en el header `Authorization: Bearer <token>` en todas las solicitudes autenticadas.
+
+El ID del usuario se almacena en `localStorage` bajo la clave `userId` cuando se hace login o registro, permitiendo agregar películas a favoritos.
 
 ## Ejecutar el Proyecto
 

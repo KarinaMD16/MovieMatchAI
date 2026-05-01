@@ -2,9 +2,13 @@ export interface Movie {
   tmdbMovieId: number
   title: string
   overview: string
-  rating: string
+  rating: string | number
   releaseDate: string
   posterUrl: string
+  genres?: string[]
+  director?: string
+  cast?: string[]
+  runtime?: number
 }
 
 export interface RecommendedMovie {

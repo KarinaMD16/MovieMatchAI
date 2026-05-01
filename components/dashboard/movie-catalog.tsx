@@ -24,10 +24,7 @@ export function MovieCatalog({ movies, searchQuery, onMovieSelect }: MovieCatalo
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {searchQuery ? "Resultados de busqueda" : "Peliculas populares"}
-          </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground">
             {filteredMovies.length} {filteredMovies.length === 1 ? "pelicula encontrada" : "peliculas encontradas"}
           </p>
         </div>

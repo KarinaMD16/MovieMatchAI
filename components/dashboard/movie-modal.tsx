@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,7 +11,9 @@ import {
   DialogDescription
 } from "@/components/ui/dialog"
 import { Star, Clock, Calendar, User, Play, Heart, X } from "lucide-react"
+import { apiClient } from "@/lib/api"
 import type { Movie } from "@/lib/types"
+import { toast } from "sonner"
 
 interface MovieModalProps {
   movie: Movie | null
@@ -19,6 +21,9 @@ interface MovieModalProps {
 }
 
 export function MovieModal({ movie, onClose }: MovieModalProps) {
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [isAddingFavorite, setIsAddingFavorite] = useState(false)
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose()
@@ -27,11 +32,48 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
     return () => window.removeEventListener("keydown", handleEscape)
   }, [onClose])
 
+  const handleAddToFavorites = async () => {
+    if (!movie) return
+
+    const userId = apiClient.getUserId()
+    if (!userId) {
+      alert("Debes iniciar sesión para agregar a favoritos")
+      return
+    }
+
+    setIsAddingFavorite(true)
+    try {
+      const movieId = movie.tmdbMovieId
+
+      if (!movieId) {
+        throw new Error("No se pudo obtener el ID de la película")
+      }
+
+      console.log("Adding to favorites - Enviando POST:", { userId, movieId, movieTitle: movie.title })
+
+      const response = await apiClient.addToFavorites(userId, Number(movieId))
+
+      console.log("Respuesta del servidor:", response)
+
+      if (response) {
+        setIsFavorited(true)
+        alert("¡Película agregada a favoritos!")
+      }
+    } catch (error) {
+      setIsFavorited(false)
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
+      console.error("Error completo:", error)
+      alert(`Error al agregar a favoritos: ${errorMessage}`)
+    } finally {
+      setIsAddingFavorite(false)
+    }
+  }
+
   if (!movie) return null
 
   return (
     <Dialog open={!!movie} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col w-[95vw]">
+      <DialogContent className=" p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
@@ -75,7 +117,12 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
                 <div className="flex flex-wrap items-center gap-4 text-sm">
                   <div className="flex items-center gap-1.5">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{movie.rating.toFixed(1)}</span>
+                    <span className="font-medium">
+                      {typeof movie.rating === 'string'
+                        ? parseFloat(movie.rating).toFixed(1)
+                        : (movie.rating as number).toFixed(1)
+                      }
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Calendar className="w-4 h-4" />
@@ -99,9 +146,14 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
                   <Play className="w-4 h-4" />
                   Ver trailer
                 </Button>
-                <Button variant="outline" className="gap-2 flex-1 md:flex-none">
-                  <Heart className="w-4 h-4" />
-                  Agregar a favoritos
+                <Button
+                  variant={isFavorited ? "default" : "outline"}
+                  className="gap-2 flex-1 md:flex-none"
+                  onClick={handleAddToFavorites}
+                  disabled={isAddingFavorite}
+                >
+                  <Heart className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`} />
+                  {isAddingFavorite ? "Agregando..." : isFavorited ? "Agregado a favoritos" : "Agregar a favoritos"}
                 </Button>
               </div>
             </div>

@@ -16,7 +16,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       className="group relative flex flex-col text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl overflow-hidden"
     >
       {/* Poster */}
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-muted">
+      <div className="relative aspect-2/3 rounded-xl overflow-hidden bg-muted">
         <Image
           src={movie.posterUrl}
           alt={movie.title}

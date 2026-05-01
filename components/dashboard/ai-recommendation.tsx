@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
@@ -8,19 +8,18 @@ import { Sparkles, Send, Wand2, Star, ChevronDown, ChevronUp } from "lucide-reac
 import { apiClient } from "@/lib/api"
 import type { AIRecommendationResponse, RecommendedMovie } from "@/lib/types"
 
-const examplePrompts = [
-  "Peliculas de ciencia ficcion con giros inesperados",
-  "Comedias romanticas de los 90s",
-  "Thrillers psicologicos que te hacen pensar",
-  "Peliculas animadas para toda la familia",
-]
+interface AIRecommendationProps {
+  onMovieSelect?: (movie: RecommendedMovie) => void
+}
 
-export function AIRecommendation() {
+export function AIRecommendation({ onMovieSelect }: AIRecommendationProps) {
   const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<AIRecommendationResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [suggestionsLoading, setSuggestionsLoading] = useState(true)
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return
@@ -43,6 +42,22 @@ export function AIRecommendation() {
   const handleExampleClick = (example: string) => {
     setPrompt(example)
   }
+
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const data = await apiClient.getSuggestions()
+        setSuggestions(data.suggestions)
+      } catch (err) {
+        console.error("Error loading suggestions:", err)
+        setSuggestions([])
+      } finally {
+        setSuggestionsLoading(false)
+      }
+    }
+
+    loadSuggestions()
+  }, [])
 
   return (
     <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-background border border-primary/20">
@@ -92,22 +107,31 @@ export function AIRecommendation() {
 
           {/* Example prompts */}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <Wand2 className="w-4 h-4" />
-              Prueba con estas ideas:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {examplePrompts.map((example) => (
-                <button
-                  key={example}
-                  onClick={() => handleExampleClick(example)}
-                  disabled={isLoading}
-                  className="px-3 py-1.5 text-sm rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
+            
+            {suggestionsLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner className="w-4 h-4" />
+                <p className="text-sm text-muted-foreground">Cargando sugerencias...</p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Wand2 className="w-4 h-4" />
+                    Prueba con estas ideas:
+                  </p>
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleExampleClick(suggestion)}
+                    disabled={isLoading}
+                    className="px-3 py-1.5 text-sm rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50 text-left line-clamp-2"
+                    title={suggestion}
+                  >
+                    {suggestion.length > 50 ? suggestion.substring(0, 50) + "..." : suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -183,7 +207,11 @@ export function AIRecommendation() {
               {!isMinimized && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {response.recommendations.map((movie: RecommendedMovie) => (
-                    <div key={movie.tmdbMovieId} className="group cursor-pointer">
+                    <div
+                      key={movie.tmdbMovieId}
+                      className="group cursor-pointer"
+                      onClick={() => onMovieSelect?.(movie)}
+                    >
                       <div className="relative overflow-hidden rounded-lg mb-2">
                         <img
                           src={movie.posterUrl}

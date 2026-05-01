@@ -24,8 +24,9 @@ interface AuthResponse {
   }
 }
 interface LoginResponse {
-  message: string,
+  message: string
   accessToken: string
+  access_token?: string
   user: {
     id: string
     email: string
@@ -33,12 +34,28 @@ interface LoginResponse {
   }
 }
 
+interface AddFavoriteResponse {
+  id: string
+  tmdbMovieId: number
+  title: string
+  posterUrl: string
+  overview: string
+  rating: string
+  createdAt: string
+}
+
 class APIClient {
   private token: string | null = null
+  private userId: string | null = null
+  private userName: string | null = null
+  private userEmail: string | null = null
 
   constructor() {
     if (typeof window !== "undefined") {
       this.token = localStorage.getItem("authToken")
+      this.userId = localStorage.getItem("userId")
+      this.userName = localStorage.getItem("userName")
+      this.userEmail = localStorage.getItem("userEmail")
     }
   }
 
@@ -49,10 +66,45 @@ class APIClient {
     }
   }
 
+  setUserId(userId: string) {
+    this.userId = userId
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userId", userId)
+    }
+  }
+
+  setUserInfo(userId: string, userName: string, userEmail: string) {
+    this.setUserId(userId)
+    this.userName = userName
+    this.userEmail = userEmail
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userName", userName)
+      localStorage.setItem("userEmail", userEmail)
+    }
+  }
+
+  getUserId(): string | null {
+    return this.userId
+  }
+
+  getUserName(): string | null {
+    return this.userName
+  }
+
+  getUserEmail(): string | null {
+    return this.userEmail
+  }
+
   clearToken() {
     this.token = null
+    this.userId = null
+    this.userName = null
+    this.userEmail = null
     if (typeof window !== "undefined") {
       localStorage.removeItem("authToken")
+      localStorage.removeItem("userId")
+      localStorage.removeItem("userName")
+      localStorage.removeItem("userEmail")
     }
   }
 
@@ -89,7 +141,12 @@ class APIClient {
       method: "POST",
       body: JSON.stringify(data),
     })
-    this.setToken(response.accessToken)
+    const token = response.accessToken || (response as any).access_token
+    if (!token) {
+      throw new Error("No token received from server")
+    }
+    this.setToken(token)
+    this.setUserInfo(response.user.id, response.user.name, response.user.email)
     return response
   }
 
@@ -98,6 +155,9 @@ class APIClient {
       method: "POST",
       body: JSON.stringify(data),
     })
+    if (response.user?.id) {
+      this.setUserInfo(response.user.id, response.user.name, response.user.email)
+    }
     return response
   }
 
@@ -120,6 +180,36 @@ class APIClient {
 
   async searchMovies(query: string): Promise<Movie[]> {
     return this.request<Movie[]>(`/tmdb/search?query=${encodeURIComponent(query)}`)
+  }
+
+  async getSuggestions(): Promise<{ total: number; suggestions: string[] }> {
+    return this.request<{ total: number; suggestions: string[] }>("/recommendations/suggestions")
+  }
+
+  async getFavorites(userId: string): Promise<Movie[]> {
+    if (!userId) {
+      throw new Error("User ID is required")
+    }
+    return this.request<Movie[]>(`/favorites/${userId}`)
+  }
+
+  async addToFavorites(userId: string, tmdbMovieId: number): Promise<{ message?: string }> {
+    if (!userId) {
+      throw new Error("User ID is required")
+    }
+    if (!tmdbMovieId) {
+      throw new Error("Movie ID is required")
+    }
+
+    const endpoint = `/favorites/${userId}`
+    const body = JSON.stringify({ tmdbMovieId })
+
+    console.log("POST to favorites - Endpoint:", endpoint, "Body:", body)
+
+    return this.request<{ message?: string }>(endpoint, {
+      method: "POST",
+      body: body,
+    })
   }
 
   logout() {
