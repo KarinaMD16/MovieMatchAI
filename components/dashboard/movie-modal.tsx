@@ -37,7 +37,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
 
     const userId = apiClient.getUserId()
     if (!userId) {
-      alert("Debes iniciar sesión para agregar a favoritos")
+      toast("Debes iniciar sesión para agregar a favoritos")
       return
     }
 
@@ -49,21 +49,17 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
         throw new Error("No se pudo obtener el ID de la película")
       }
 
-      console.log("Adding to favorites - Enviando POST:", { userId, movieId, movieTitle: movie.title })
-
       const response = await apiClient.addToFavorites(userId, Number(movieId))
 
-      console.log("Respuesta del servidor:", response)
 
       if (response) {
         setIsFavorited(true)
-        alert("¡Película agregada a favoritos!")
+        toast("¡Película agregada a favoritos!")
       }
     } catch (error) {
       setIsFavorited(false)
       const errorMessage = error instanceof Error ? error.message : "Error desconocido"
-      console.error("Error completo:", error)
-      alert(`Error al agregar a favoritos: ${errorMessage}`)
+      toast(`Error al agregar a favoritos: ${errorMessage}`)
     } finally {
       setIsAddingFavorite(false)
     }
@@ -73,7 +69,7 @@ export function MovieModal({ movie, onClose }: MovieModalProps) {
 
   return (
     <Dialog open={!!movie} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className=" p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-6xl p-0 overflow-hidden bg-card max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
